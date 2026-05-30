@@ -81,6 +81,7 @@ MAX_TTS_CHARS = 800
 class TTSRequest(BaseModel):
     text: str
     voice: Optional[str] = None
+    speed: Optional[float] = None  # 0.25 – 4.0, default 0.9 (gentler for kids)
 
 
 @app.post("/api/tts")
@@ -95,6 +96,14 @@ def tts(req: TTSRequest):
     if voice not in ALLOWED_VOICES:
         voice = DEFAULT_VOICE
 
+    # Slower default than OpenAI's 1.0 — clearer for a child's ear.
+    speed = req.speed if (req.speed is not None) else 0.9
+    try:
+        speed = float(speed)
+    except (TypeError, ValueError):
+        speed = 0.9
+    speed = max(0.5, min(1.5, speed))
+
     try:
         client = _openai()
         response = client.audio.speech.create(
@@ -102,6 +111,7 @@ def tts(req: TTSRequest):
             voice=voice,
             input=text,
             response_format="mp3",
+            speed=speed,
         )
         audio_bytes = response.read()
     except HTTPException:
