@@ -7,9 +7,27 @@ services:
     startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     autoDeploy: true
+    disk:
+      name: magiko-data
+      mountPath: /var/data
+      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: "3.11"
-      # OPENAI_API_KEY must be set in the Render dashboard (per-deploy secret).
+      - key: DB_PATH
+        value: /var/data/magiko.db
+      - key: PUBLIC_BASE_URL
+        value: https://magiko-tetradio.onrender.com
+      # ---- secrets — set these in the Render dashboard (sync:false) ----
       - key: OPENAI_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: PRICE_BASIC_MONTHLY
+        sync: false
+      - key: PRICE_FULL_MONTHLY
+        sync: false
+      - key: PRICE_FULL_YEARLY
         sync: false
