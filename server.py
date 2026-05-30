@@ -318,4 +318,5 @@ def generate_question(req: GenQuestionRequest):
         raise
     except Exception as exc:  # noqa: BLE001
         print(f"[generate-question] error: {exc!r}")
-        raise HTTPException(status_code=502, detail="Could not generate question")
+        # Surface the upstream message so we can see what's wrong in the UI
+        raise HTTPException(status_code=502, detail=f"OpenAI: {type(exc).__name__}: {str(exc)[:280]}")
